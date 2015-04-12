@@ -11,9 +11,15 @@ W_image = imread('phanton_template.tif');
 ft_C_image = fft(C_image);
 ft_W_image = fft(W_image);
 
-
-%Then correlation image to find the centroids
+%%Then correlation image to find the centroids
+%Dont know how to make it work
+%Correlation = ft_C_image*ft_W_image;
+%R = ifft(Correlation);
+%
 
 %Other method, use filter2
-Correlation = filter2(W_image,C_image);
+%We should get the ideal centroids ?
+Correlation = filter2(W_image,C_image,'same');
+Correlation(Correlation>255) = 255;
+figure()
 imshow(Correlation)
