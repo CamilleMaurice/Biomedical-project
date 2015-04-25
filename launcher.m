@@ -54,7 +54,8 @@ plot(exp_centroids(:,1),exp_centroids(:,2), 'ro')
 hold off
 
 
-
+%Interpolation methods : http://www.mathworks.com/help/vision/ug/interpolation-methods.html
+%
 %Other method, use filter2
 %We should get the ideal centroids ?
 %Correlation = filter2(W_image,C_image,'same');
