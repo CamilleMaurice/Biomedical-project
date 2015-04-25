@@ -4,13 +4,36 @@ clc;
 %Open the image
 C_image = imread('phanton_no_noise.tif');
 BW = im2bw(C_image, 0.35);
-%imshow(medfilt2(BW)
-%BW =medfilt2(BW); (for the noisy phantom)
+%figure()
+%imshow(BW)
 
-%Work quite good but pb on the borders...Maybe we should ignore the
-%borders? 
+
+%Get border im, see if it help
+[X,Y]=size(BW);
+
+%Get the centroids of the border
+% sb = regionprops(BW, 'Centroid');
+% expborder_centroids = cat(1, sb.Centroid);
+% figure()
+% imshow(border)
+% hold on
+% plot(expborder_centroids(:,1),expborder_centroids(:,2), 'b*')
+% hold off
+
+
+%BW2 is the image without the borders
+BW2=BW;
+BW2(:,1:32) = 0;
+BW2(1:32,:) = 0;
+BW2(:,Y-32:Y) = 0;
+BW2(X-32:X,:) = 0;
+
 s = regionprops(BW, 'Centroid');
 exp_centroids = cat(1, s.Centroid);
+
+%Works quite well, but problem on the borders, I dont think the center is
+%well found. Uncomment the figure to check it visually
+%figure()
 %imshow(BW)
 %hold on
 %plot(exp_centroids(:,1),exp_centroids(:,2), 'b*')
@@ -26,32 +49,37 @@ ft_W_image = fft2(W_image);
 %%Then correlation image to find the centroids
 Correlation = ft_C_image.*ft_W_image;
 R = ifft2(Correlation);
-
-%find the max and only keep the max. It correspond to the value of the
-%pixels that are true center
-M = max(max(R));
-R(R<M) = 255;
-R(R>=M) = 0;
-
 %imshow(R)
-[row,col] = find(R<255);
-theory_centroids = cat(2,row,col);
 
-%sort the coordinates in x ascending order
-[x,y] = sort(theory_centroids(:,1));
-sorted = theory_centroids(y,:);
+%find theoretical centroids -- method 2
+R = im2bw (R, 0.35);
+%invert the image so regionprops works
+R2 = imcomplement(R);
+t = regionprops(R2, 'Centroid');
+th_centroids = cat(1, t.Centroid);
 
-theory_centroids = sorted;
-exp_centroids;
+%figure()
+%imshow(R2)
+%hold on
+%plot(th_centroids(:,1),th_centroids(:,2), 'ro')
+%hold off
 
+S1 =['nombre de centroids theoriques : ',num2str(size(th_centroids,1))];
+display(S1)
+S2 = ['nombre de centroids exp : ',num2str(size(exp_centroids,1))];
+display(S2)
 
-%Problem: I found the same coordinates for the theoretical ones and the
-%experimental ones ! (except on the borders)
-imshow(C_image)
+%Less centroids in the theoretical result (problem with the borders maybe
+%?)
+figure()
+imshow(C_image);
 hold on
-plot(theory_centroids(:,1),theory_centroids(:,2), 'b*')
-plot(exp_centroids(:,1),exp_centroids(:,2), 'ro')
+plot(th_centroids(:,1),th_centroids(:,2), 'ro')
+plot(exp_centroids(:,1),exp_centroids(:,2), 'b*')
 hold off
+
+%We should detect the same number of centroids
+%Perform difference of the coordinates to get displacement
 
 
 %Interpolation methods : http://www.mathworks.com/help/vision/ug/interpolation-methods.html
@@ -62,3 +90,20 @@ hold off
 %Correlation(Correlation>255) = 255;
 %figure()
 %imshow(Correlation)
+
+
+%find centroids -- method 1
+%find the max and only keep the max. It correspond to the value of the
+%pixels that are true center
+%M = max(max(R));
+%R(R<M) = 255;
+%R(R>=M) = 0;
+%imshow(R)
+%[row,col] = find(R<255);
+%theory_centroids = cat(2,row,col);
+%sort the coordinates in x ascending order
+% [x,y] = sort(theory_centroids(:,1));
+% sorted = theory_centroids(y,:);
+% 
+% theory_centroids = sorted;
+% exp_centroids;
