@@ -8,13 +8,12 @@ BW = im2bw(C_image, 0.35);
 %Work quite good but pb on the borders...Maybe we should ignore the
 %borders? 
 s = regionprops(BW, 'Centroid');
-centroids = cat(1, s.Centroid);
-imshow(BW)
-hold on
-plot(centroids(:,1),centroids(:,2), 'b*')
-hold off
-
-
+exp_centroids = cat(1, s.Centroid);
+%imshow(BW)
+%hold on
+%plot(exp_centroids(:,1),exp_centroids(:,2), 'b*')
+%hold off
+exp_centroids;
 %Open the windowed version (find how to get it automatically)
 W_image = imread('phanton_t2.tif');
 
@@ -23,16 +22,27 @@ ft_C_image = fft2(C_image);
 ft_W_image = fft2(W_image);
 
 %%Then correlation image to find the centroids
-%Dont know how to make it work
 Correlation = ft_C_image.*ft_W_image;
 R = ifft2(Correlation);
 %find the max and only keep the max. It correspond to the value of the
 %pixels that are true center
-M = max(max(R))
+M = max(max(R));
 R(R<M) = 255;
 R(R>=M) = 0;
 
+[row,col] = find(R<255);
+theory_centroids = cat(2,row,col);
 
+%Problem: I found the same coordinates for the theoretical ones and the
+%experimental ones !
+imshow(BW)
+hold on
+plot(theory_centroids(:,1),theory_centroids(:,2), 'b*')
+plot(exp_centroids(:,1),exp_centroids(:,2), 'ro')
+hold off
+
+%size(theory_centroids)
+%size(exp_centroids)
 
 %Other method, use filter2
 %We should get the ideal centroids ?
