@@ -34,7 +34,7 @@ R(R>=M) = 0;
 theory_centroids = cat(2,row,col);
 
 %Problem: I found the same coordinates for the theoretical ones and the
-%experimental ones !
+%experimental ones ! (except on the borders)
 imshow(BW)
 hold on
 plot(theory_centroids(:,1),theory_centroids(:,2), 'b*')
