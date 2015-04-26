@@ -9,7 +9,7 @@ BW = im2bw(C_image, 0.35);
 
 
 %Get border im, see if it help
-[X,Y]=size(BW);
+[X,Y] = size(BW);
 
 %Get the centroids of the border
 % sb = regionprops(BW, 'Centroid');
@@ -21,12 +21,12 @@ BW = im2bw(C_image, 0.35);
 % hold off
 
 
-%BW2 is the image without the borders
-BW2=BW;
-BW2(:,1:32) = 0;
-BW2(1:32,:) = 0;
-BW2(:,Y-32:Y) = 0;
-BW2(X-32:X,:) = 0;
+%BW_B is the image without the borders
+BW_B = BW;
+BW_B(:,1:32) = 0;
+BW_B(1:32,:) = 0;
+BW_B(:,Y-32:Y) = 0;
+BW_B(X-32:X,:) = 0;
 
 s = regionprops(BW, 'Centroid');
 exp_centroids = cat(1, s.Centroid);
@@ -51,18 +51,19 @@ Correlation = ft_C_image.*ft_W_image;
 R = ifft2(Correlation);
 %imshow(R)
 
+
 %find theoretical centroids -- method 2
-R = im2bw (R, 0.35);
+R_BW = im2bw (R, 0.35);
 %invert the image so regionprops works
-R2 = imcomplement(R);
-t = regionprops(R2, 'Centroid');
+R_WB = imcomplement(R_BW);
+t = regionprops(R_WB, 'Centroid');
 th_centroids = cat(1, t.Centroid);
 
-%figure()
-%imshow(R2)
-%hold on
-%plot(th_centroids(:,1),th_centroids(:,2), 'ro')
-%hold off
+figure()
+imshow(R_BW)
+hold on
+plot(th_centroids(:,1),th_centroids(:,2), 'ro')
+hold off
 
 S1 =['nombre de centroids theoriques : ',num2str(size(th_centroids,1))];
 display(S1)
@@ -100,10 +101,19 @@ hold off
 %R(R>=M) = 0;
 %imshow(R)
 %[row,col] = find(R<255);
-%theory_centroids = cat(2,row,col);
+%theory_centroids2 = cat(2,row,col);
 %sort the coordinates in x ascending order
-% [x,y] = sort(theory_centroids(:,1));
-% sorted = theory_centroids(y,:);
+% [x,y] = sort(theory_centroids2(:,1));
+% sorted = theory_centroids2(y,:);
 % 
-% theory_centroids = sorted;
-% exp_centroids;
+% theory_centroids2 = sorted;
+%M = max(max(R));
+%R(R<M) = 255;
+%R(R>=M) = 0;
+%imshow(R)
+%[row,col] = find(R<255);
+%theory_centroids2 = cat(2,row,col);
+%sort the coordinates in x ascending order
+%[x,y] = sort(theory_centroids2(:,1));
+%sorted = theory_centroids2(y,:);
+ 
