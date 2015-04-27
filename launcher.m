@@ -1,5 +1,5 @@
-%right now i strongly think it doesn't work only cause i haven't figured out borders yet
-% will see that after bayesian
+%right now i strongly think it doesn't work only because we should crop the
+%image and not have borders, will take care of it tonight or in the morning
 
 clear all;
 clc;
