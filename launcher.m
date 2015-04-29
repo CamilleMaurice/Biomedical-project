@@ -3,84 +3,86 @@ clc;
 
 %Open the image
 C_image = imread('phanton_no_noise.tif');
+%convert it to binary so we can get the centroids using regionprops
 BW = im2bw(C_image, 0.35);
-%figure()
-%imshow(BW)
 
-
-%Get border im, see if it help
+%Get size of the image and of the phantom
 [X,Y] = size(BW);
+size_phantom = 64;
 
-%Get the centroids of the border
-% sb = regionprops(BW, 'Centroid');
-% expborder_centroids = cat(1, sb.Centroid);
-% figure()
-% imshow(border)
-% hold on
-% plot(expborder_centroids(:,1),expborder_centroids(:,2), 'b*')
-% hold off
+%BW_B is the image without the borders, we crop it, and we compute the
+%centroids
+rect = [size_phantom/2, size_phantom/2, X-size_phantom, Y-size_phantom];
+BW_B = imcrop (BW,rect);
 
-
-%BW_B is the image without the borders
-BW_B = BW;
-BW_B(:,1:32) = 0;
-BW_B(1:32,:) = 0;
-BW_B(:,Y-32:Y) = 0;
-BW_B(X-32:X,:) = 0;
-
-s = regionprops(BW, 'Centroid');
+s = regionprops(BW_B, 'Centroid'); 
 exp_centroids = cat(1, s.Centroid);
+figure(100)
+    imshow(BW_B)
 
-%Works quite well, but problem on the borders, I dont think the center is
-%well found. Uncomment the figure to check it visually
-%figure()
+%figure(1)
 %imshow(BW)
 %hold on
 %plot(exp_centroids(:,1),exp_centroids(:,2), 'b*')
 %hold off
 
+%Attemps to compute the windowed version, still a work in progress
+%CC = bwconncomp(BW_B);
+%N = sqrt(CC.NumObjects);
+%assert(mod(N,1)==0);
+%assert(mod(N,2)==1);%check it's integer and odd number
+%N
+
 %Open the windowed version (find how to get it automatically)
+%and crop it so they both have same size
 W_image = imread('phanton_t2.tif');
+rect = [size_phantom/2, size_phantom/2, X-size_phantom, Y-size_phantom];
+W_image_B = imcrop (W_image,rect);
 
 %Compute FT of both
-ft_C_image = fft2(BW);
-ft_W_image = fft2(W_image);
+ft_C_image = fft2(BW_B);
+ft_W_image = fft2(W_image_B);
 
 %%Then correlation image to find the centroids
-Correlation = ft_C_image.*ft_W_image;
+Correlation = ft_C_image.*ft_W_image;%xcorr(ft_C_image(:,:),ft_W_image(:,:));%f
 R = ifft2(Correlation);
+%figure(2)
 %imshow(R)
 
-
-%find theoretical centroids -- method 2
+%find theoretical centroids 
 R_BW = im2bw (R, 0.35);
 %invert the image so regionprops works
 R_WB = imcomplement(R_BW);
 t = regionprops(R_WB, 'Centroid');
 th_centroids = cat(1, t.Centroid);
 
-figure()
-imshow(R_BW)
-hold on
-plot(th_centroids(:,1),th_centroids(:,2), 'ro')
-hold off
+%figure(3)
+%imshow(R_BW)
+%hold on
+%plot(th_centroids(:,1),th_centroids(:,2), 'ro')
+%hold off
 
 S1 =['nombre de centroids theoriques : ',num2str(size(th_centroids,1))];
 display(S1)
 S2 = ['nombre de centroids exp : ',num2str(size(exp_centroids,1))];
 display(S2)
 
-%Less centroids in the theoretical result (problem with the borders maybe
-%?)
-figure()
-imshow(C_image);
+figure(5)
+imshow(BW_B);
 hold on
 plot(th_centroids(:,1),th_centroids(:,2), 'ro')
 plot(exp_centroids(:,1),exp_centroids(:,2), 'b*')
 hold off
 
-%We should detect the same number of centroids
 %Perform difference of the coordinates to get displacement
+Vectors = th_centroids - exp_centroids;
+
+
+
+
+
+
+
 
 
 %Interpolation methods : http://www.mathworks.com/help/vision/ug/interpolation-methods.html
