@@ -1,3 +1,6 @@
+%right now i strongly think it doesn't work only because we should crop the
+%image and not have borders, will take care of it tonight or in the morning
+
 clear all;
 clc;
 
@@ -17,11 +20,9 @@ BW_B = imcrop (BW,rect);
 
 s = regionprops(BW_B, 'Centroid'); 
 exp_centroids = cat(1, s.Centroid);
-figure(100)
-    imshow(BW_B)
 
 %figure(1)
-%imshow(BW)
+%imshow(BW_B)
 %hold on
 %plot(exp_centroids(:,1),exp_centroids(:,2), 'b*')
 %hold off
@@ -40,14 +41,14 @@ rect = [size_phantom/2, size_phantom/2, X-size_phantom, Y-size_phantom];
 W_image_B = imcrop (W_image,rect);
 
 %Compute FT of both
+
 ft_C_image = fft2(BW_B);
 ft_W_image = fft2(W_image_B);
+
 
 %%Then correlation image to find the centroids
 Correlation = ft_C_image.*ft_W_image;%xcorr(ft_C_image(:,:),ft_W_image(:,:));%f
 R = ifft2(Correlation);
-%figure(2)
-%imshow(R)
 
 %find theoretical centroids 
 R_BW = im2bw (R, 0.35);
@@ -67,6 +68,7 @@ display(S1)
 S2 = ['nombre de centroids exp : ',num2str(size(exp_centroids,1))];
 display(S2)
 
+
 figure(5)
 imshow(BW_B);
 hold on
@@ -76,6 +78,7 @@ hold off
 
 %Perform difference of the coordinates to get displacement
 Vectors = th_centroids - exp_centroids;
+
 
 
 
